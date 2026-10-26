@@ -1,4 +1,4 @@
-package com.example.form_validation_ex
+package com.example.form_validation_ex.ui
 
 import android.content.Intent
 import android.os.Bundle
