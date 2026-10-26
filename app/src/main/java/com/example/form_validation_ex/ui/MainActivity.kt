@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import android.view.View
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.doAfterTextChanged
 import com.example.form_validation_ex.R
 import com.example.form_validation_ex.databinding.ActivityMainBinding
@@ -25,13 +28,43 @@ class MainActivity : AppCompatActivity() {
     private var backupConfirmPass: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        applyWindowInsets()
         setupRealtimeValidation()
         setupSelectionListeners()
         setupButtons()
+    }
+
+    /**
+     * Từ targetSdk 35+ app luôn chạy edge-to-edge: nội dung bị vẽ đè dưới status bar,
+     * navigation bar và bàn phím (adjustResize không còn tác dụng). Cộng thêm insets
+     * vào padding gốc để cụm nút HỦY / ĐĂNG KÝ ở cuối form luôn cuộn tới và nhìn thấy được.
+     */
+    private fun applyWindowInsets() {
+        val root = binding.root
+        val baseLeft = root.paddingLeft
+        val baseTop = root.paddingTop
+        val baseRight = root.paddingRight
+        val baseBottom = root.paddingBottom
+
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or
+                        WindowInsetsCompat.Type.displayCutout() or
+                        WindowInsetsCompat.Type.ime()
+            )
+            view.setPadding(
+                baseLeft + bars.left,
+                baseTop + bars.top,
+                baseRight + bars.right,
+                baseBottom + bars.bottom
+            )
+            insets
+        }
     }
 
     private fun setupRealtimeValidation() {
